@@ -1,0 +1,39 @@
+{
+  "name": "masq-ui",
+  "version": "0.0.0",
+  "description": "",
+  "main": "src/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:dev": "webpack-dev-server",
+    "build": "webpack --mode production",
+    "build:dev": "webpack --mode development"
+  },
+  "author": "",
+  "license": "",
+  "devDependencies": {
+    "copy-webpack-plugin": "^6.0.3",
+    "css-loader": "^4.2.1",
+    "style-loader": "^1.2.1",
+    "svg-inline-loader": "^0.8.2",
+    "vue-loader": "^15.9.3",
+    "vue-template-compiler": "^2.6.11",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "dependencies": {
+    "@forevolve/bootstrap-dark": "^1.0.0-alpha.1091",
+    "bootstrap": "^4.5.2",
+    "bootstrap-vue": "^2.16.0",
+    "chart.js": "^2.9.3",
+    "clipboard": "^2.0.6",
+    "ethers": "^5.0.8",
+    "hashicon": "^0.3.0",
+    "vue": "^2.6.11",
+    "vue-chartjs": "^3.5.0",
+    "vue-router": "^3.4.2",
+    "vue-vis-network": "^1.0.2",
+    "vuex": "^3.5.1"
+  }
+}
