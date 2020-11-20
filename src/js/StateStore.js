@@ -125,6 +125,8 @@ export default {
 
         updateNodePort: (state, port) => state.session.websocket.node.port = port,
 
+        updateDescriptor: (state, descriptor) => state.node.descriptor = descriptor,
+
         appendFinancials: (state, payload) => {
             state.session.financials.timesPolled.push(payload.time);
             state.session.financials.credit.push(payload.credit);
