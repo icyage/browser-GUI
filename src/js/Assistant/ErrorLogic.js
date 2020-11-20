@@ -94,7 +94,7 @@ export default class ErrorLogic {
         const steps = [
             () => {
                 return new Promise(function(resolve, reject) {
-                    addMessage({ from: 'masq', text: "(Demo ONLY) You'll need a valid 'Node Descriptor' for this mode." }); // overview of the problem
+                    addMessage({ from: 'masq', text: "You'll need a valid 'Node Descriptor' for this mode." }); // overview of the problem
                     addMessage({ from: 'masq', text: "If you'd like, I can get one from nodes.masq.ai automatically?" }); // offer to help
 
                     $store.commit('replaceAssistantUserResponses', [
@@ -103,11 +103,17 @@ export default class ErrorLogic {
                     ]);
                 });
             },
-            (response) => { 
+            async (response) => { 
                 if(response) {
                     // user indicated for assistant to proceed
-                    $store.commit('updateSetupProperty', { name: 'neighbors', value: 'K701GTsyAsRUOatbvMGDJaLzATdt3S9/h6Tt0QOatgc@40.114.233.72:1025' }); // populate ip setup value
-                    addMessage({ from: 'masq', text: '🎉 done (not really. Feature not live)' })
+                    let descriptor;
+                    if(descriptor = await Utils.getPublicDescriptor()) {
+                        $store.commit('updateSetupProperty', { name: 'neighbors', value: descriptor }); // populate ip setup value
+                        addMessage({ from: 'masq', text: '🎉 done' });
+                    } else {
+                        // error getting public descriptor
+                        addMessage({ from: 'masq', text: 'Sorry, couldn\'t get a public node descriptor.' });
+                    }
                 } else {
                     // quit
                     addMessage({ from: 'user', text: 'No' });

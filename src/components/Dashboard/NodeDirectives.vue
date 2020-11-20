@@ -62,7 +62,10 @@
                 <b-form-input v-model.trim="localNeighborDescriptor"></b-form-input>
 
                 <template v-slot:append>
-                    <b-button variant="outline-success" @click="setNeighbor" :disabled="isModeSynced">Set</b-button>
+                    <b-button @click="fetchPublicDescriptor" variant="outline-secondary" v-b-tooltip.hover title="Fetch Public Descriptor">
+                        <b-icon icon="cloud-arrow-down"></b-icon>
+                    </b-button>
+                    <b-button v-show="localNeighborDescriptor && localNeighborDescriptor != descriptor" variant="outline-success" @click="setNeighbor" :disabled="isModeSynced">Set</b-button>
                 </template>
             </b-input-group>
         </b-collapse>
@@ -168,6 +171,15 @@ export default {
                 this.$root.$data.controller.start();
             }
         },
+        async fetchPublicDescriptor() {
+            let descriptor;
+            if(descriptor = await this.utils.getPublicDescriptor(this.isMainnet)) {
+                this.localNeighborDescriptor = descriptor;
+                this.setNeighbor();
+            } else {
+                this.createToast('danger', 'Error fetching public node descriptor.');
+            }
+        },
         setNeighbor: function() {
             this.$store.commit('updateSetupProperty', {
                 name: 'neighbors',
@@ -226,6 +238,14 @@ export default {
         }
     },
     computed: {
+        isMainnet: {
+            get() {
+                return this.$store.state.node.setup["chain"].value === "mainnet";
+            }
+        },
+        descriptor: function() {
+            return this.$store.state.node.setup["neighbors"].value;
+        },
         mode: {
             get() {
                 let mode = this.$store.state.node.setup['neighborhood-mode'].value;

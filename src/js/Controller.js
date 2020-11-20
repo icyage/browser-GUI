@@ -28,6 +28,7 @@ export class Controller {
         this._messenger.on('shutdown', this.onShutdown.bind(this));
         this._messenger.on('start', this.onStart.bind(this));
         this._messenger.on('onUnmarshalError', this.onUnmarshalError.bind(this));
+        this._messenger.on('descriptor', this.onDescriptor.bind(this));
 
     }
 
@@ -119,7 +120,10 @@ export class Controller {
             this._store.commit('updateNodePort', port);
             this._store.commit(isOpened ? 'connected' : 'disconnected', 'node');
             //this._store.commit(!isOpened ? 'connected' : 'disconnected', 'daemon');
-            if(isOpened) this._messenger.send('blah', { values: [] });
+            if(isOpened) {
+                this._messenger.send('descriptor', {}); // request node descriptor
+                this._messenger.send('blah', { values: [] });
+            }
         }
 
         this._store.commit('log', `WebSocket ${actionModifier} ${connectionType} on port ${port}`);
@@ -161,10 +165,14 @@ export class Controller {
     onFinancials(payload) {
         this._store.commit('appendFinancials', {
             time: + new Date(),
-            credit: payload.totalReceivable,
-            debt: payload.totalPayable
+            credit: payload.totalReceivable / 1000000000000000000,
+            debt: payload.totalPayable / 1000000000000000000
         });
         
+    }
+
+    onDescriptor(payload) {
+        this._store.commit('updateDescriptor', payload.nodeDescriptor);
     }
 
     onRedirect(payload) {
