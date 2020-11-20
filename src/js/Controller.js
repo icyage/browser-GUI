@@ -161,8 +161,8 @@ export class Controller {
     onFinancials(payload) {
         this._store.commit('appendFinancials', {
             time: + new Date(),
-            credit: payload.totalReceivable,
-            debt: payload.totalPayable
+            credit: payload.totalReceivable / 1000000000000000000,
+            debt: payload.totalPayable / 1000000000000000000
         });
         
     }

@@ -113,11 +113,11 @@ export default {
                 this.updateChart();
             }
         },
-        "store.node.isRunning": function() {
-            return; // NO LONGER MOCKING
+        "$store.state.isNodeRunning": function() {
+            if(1==1) return; // NO LONGER MOCKING
             this.clearChart();
 
-            if(this.store.node.isRunning) {
+            if(this.$store.state.isNodeRunning) {
                 // temp chart mocking
                 let intervalCount = 0;
                 this.fakeDataInterval = setInterval(() => {
