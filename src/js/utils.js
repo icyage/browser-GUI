@@ -1,3 +1,5 @@
+let triedDescriptors = [];
+
 export class Utils {
     constructor() {
 
@@ -121,6 +123,37 @@ export class Utils {
         } catch(error) {
             console.error(`Failed to get IP (${error})`)
             return false;
+        }
+    }
+
+    /**
+     * Get publicly shared node descriptors from nodes.masq.ai
+     */
+    static async getPublicDescriptor(isMainnet = false) {
+        let data;
+        try {
+            let resp = await fetch('https://nodes.masq.ai/api/v0/nodes');
+            data = await resp.json()
+        } catch(error) {
+            console.error(`Failed to get node descriptors from nodes.masq.ai`);
+            return false;
+        }
+
+        // data length check
+        if(data.length === 0) {
+            console.error('No public node descriptors available');
+            return false;
+        }
+
+        // reset cache if max cycled
+        if(data.filter(d => d.mainnet === isMainnet).length === triedDescriptors.length) triedDescriptors = [];
+
+        for(let i = 0; i < data.length; i++) {
+            if(data[i].mainnet === isMainnet && !triedDescriptors.includes(data[i].descriptor)) {
+                triedDescriptors.push(data[i].descriptor);
+                return data[i].descriptor;
+                break;
+            }
         }
     }
 
