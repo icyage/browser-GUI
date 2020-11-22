@@ -157,4 +157,16 @@ export class Utils {
         }
     }
 
+    /**
+     * Determines if the GUI is within an electron window or not.
+     * @returns {Boolean} is environment electron
+     */
+    static isElectronEnvironment() {
+        const userAgent = navigator.userAgent.toLowerCase();
+        if (userAgent.indexOf(' electron/') > -1) {
+            return true;
+        }
+        return false;
+    }
+
 }

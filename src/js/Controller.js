@@ -3,6 +3,8 @@ import { Utils } from './utils.js';
 import { Storage } from './Storage.js';
 import BalanceProviders from './BalanceProviders.js';
 
+const NODE_DESCRIPTOR_PATTERN = /([a-zA-Z0-9\/=+]{25,90}(:|@)\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{1,65999})/g;
+
 export class Controller {
     constructor() {
         this._store = null; // set in plugin()
@@ -48,7 +50,7 @@ export class Controller {
         this._messenger.connect(store.state.settings.daemonPort);
 
         store.subscribe(mutation => {
-            console.log('Controller.js:plugin (subscriber)', mutation.type);
+            //console.log('Controller.js:plugin (subscriber)', mutation.type);
             
             switch(mutation.type) {
                 // Settings
@@ -75,6 +77,42 @@ export class Controller {
                     store.commit('log', `'${mutation.payload.name}' setup value updated to '${mutation.payload.value}'`);
                 break;
 
+                // local descriptor update (check validity)
+                case 'updateDescriptor':
+                    // disable port verification if assistant is disabled
+                    if(store.state.settings.enableAssistant) {
+                        
+                        console.log('Controller:updateDescriptor', mutation.payload)
+                        if(NODE_DESCRIPTOR_PATTERN.test(mutation.payload)) {
+                            console.log('descriptor good');
+                            // decriptor good
+                            (async () => {
+                                try {
+                                    let isPortOpen = await this.verifyPortOpen(mutation.payload);
+                                    console.log('isPortOpen', isPortOpen);
+
+                                    if(!isPortOpen) {
+                                        store.commit('showAssistantBody'); // open assistant
+                                        store.commit('appendAssistantMessage', {
+                                            from: 'masq',
+                                            text: `Seems your clandestine port (${store.state.node.setup['clandestine-port'].value}) isn't open.`
+                                        });
+
+                                        store.commit('appendAssistantMessage', {
+                                            from: 'masq',
+                                            text: 'Help: <a href="https://portforward.com/" target="_blank" style="color: white; text-decoration: underline;">PortForward.com</a>'
+                                        });
+                                    }
+                                } catch(error) {
+                                    console.error(error);
+                                }
+                            })();
+                        } else {
+                            console.log('descriptor bad');
+                        }
+                    }
+                break;
+
                 // pageloaded
 
 
@@ -88,6 +126,28 @@ export class Controller {
 
     getLog() {
         return this._log;
+    }
+
+    async verifyPortOpen(descriptor) {
+        try {
+            let resp = await fetch('https://nodes.masq.ai/api/v0/services/status', {
+                method: 'POST',
+                body: JSON.stringify({
+                    descriptor: descriptor
+                }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+            let data = await resp.json();
+
+            if(data.hasOwnProperty('success')) return data.port_open;
+
+        } catch (error) {
+            throw 'Controller.js:verifyPortOpen', 'Failed to verify node descriptor';
+        }
+
     }
 
     /**
@@ -112,6 +172,7 @@ export class Controller {
             this._messenger.send('blah', { values: [] }); // send empty Unknown opcode, 'blah', (essentially a request for a redirect to node port if running)
             this._store.commit(isOpened ? 'connected' : 'disconnected', 'daemon');
             //this._store.commit(!isOpened ? 'connected' : 'disconnected', 'node');
+            this._store.commit('updateRunningStatus', false);
         } else {
             // connected to node
             connectionType = 'node';
@@ -236,17 +297,7 @@ export class Controller {
     // MASQ commands / helpers
 
     requestFinancials() {
-        console.log('Controller.js:requestFinancial', 'requesting...');
-        // Start: MOCK
-        /*
-        let payload = {
-            totalReceivable: this._store.getters.credit + Math.random() * 0.05,
-            totalPayable: this._store.getters.debt + Math.random() * 0.06
-        }
-
-        this.onFinancials(payload);
-        */
-        // End: Mock
+        //console.log('Controller.js:requestFinancial', 'requesting...');
 
         this._messenger.send('financials', {
             "payableMinimumAmount": 1,

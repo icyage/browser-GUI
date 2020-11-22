@@ -3,6 +3,7 @@ const balanceproviders = new BalanceProviders();
 
 export default {
     state: {
+        isElectron: false,
         isPageLoaded: false, // page loaded status
         isNodeStarting: false,
         isNodeRunning: false, // could be different temporarily than its websocket connection status
@@ -24,9 +25,9 @@ export default {
                 ethBalance: null,
                 masqBalance: null,
                 // from masq node
-                timesPolled: new Array(15).fill(0).map((x, i) => i),
-                credit: new Array(15).fill(0),
-                debt: new Array(15).fill(0)
+                timesPolled: [...Array(30).keys()],
+                credit: new Array(30).fill(0),
+                debt: new Array(30).fill(0)
             },
             assistant: {
                 showBody: false,
@@ -42,6 +43,8 @@ export default {
             daemonPort: 5333,
             enableZeroHop: true,
             enableAssistant: true,
+            // not in settings view
+            menuMinimized: false,
         },
         node: {
             descriptor: '(This version can\'t access Node Descriptor)',//'V2hlcmUgaXMgSnVzdGluIFRhYmIsICRTVUIgQ0VPPz8/:74.114.82.72:5386',
@@ -166,6 +169,8 @@ export default {
 
         // Assistant
         toggleAssistantBody: (state) => state.session.assistant.showBody = !state.session.assistant.showBody,
+
+        showAssistantBody: (state) => state.session.assistant.showBody = true,
 
         appendAssistantMessage: (state, message) => {
             message['id'] = Math.floor(Math.random() * 100000);

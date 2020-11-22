@@ -33,6 +33,9 @@ import Assistant from './js/Assistant/Assistant.js';
 const controller = new Controller();
 const assistant = new Assistant();
 
+// set if environment is electron
+StateStore.state.isElectron = Utils.isElectronEnvironment();
+
 // add vuex plugins
 StateStore.plugins = [
     controller.plugin.bind(controller), 
@@ -82,6 +85,7 @@ const app = new Vue({
     data() {
         return {
             controller,
+            winSizeWidth: window.innerWidth,
         }
     },
     router,
@@ -95,6 +99,9 @@ const app = new Vue({
                 document.body.classList.remove('bootstrap');
                 document.body.classList.add('bootstrap-dark');
             }
+        },
+        onResize: function(e) {
+            this.winSizeWidth = window.innerWidth;
         }
     },
     watch: {
@@ -102,10 +109,26 @@ const app = new Vue({
         "$store.state.settings.theme": function() {
             this.applyTheme();
         },
+        winSizeWidth: {
+            immediate: true,
+            handler() {
+                let val = false;
+                if(this.winSizeWidth < 1100) {
+                    val = true;
+                }
+
+                this.$store.commit('updateSettings', {
+                    name: 'menuMinimized',
+                    value: val
+                });
+            }
+        }
     },
     beforeMount() {
         this.applyTheme();
-    }
+
+        window.addEventListener('resize', this.onResize);
+    },
 });
 
 store.$app = app; // expose root vue instance to store (primarily for toast messages)

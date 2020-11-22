@@ -11,23 +11,23 @@ import AcivityChart from './ActivityChart.vue';
 export default {
     data() {
         return {
-            maxDataPoints: 15,
+            maxDataPoints: 30,
             chartData : {
-                labels: new Array(15).map((x, i) => i),
+                labels: [],
                 datasets: [
                     {
                         label: 'Credit',
                         backgroundColor: 'rgba(53, 229, 57, 0.3)',
                         borderColor: 'rgb(0,255,0)',
                         borderWidth: 2,
-                        data: new Array(15).fill(0)
+                        data: []
                     },
                     {
                         label: 'Debt',
                         backgroundColor: 'rgba(229, 57, 53, 0.3)',
                         borderColor: 'rgb(255,0,0)',
                         borderWidth: 2,
-                        data: new Array(15).fill(0)
+                        data: []
                     }
                 ]
             },
@@ -38,6 +38,9 @@ export default {
                 scales: {
                     xAxes: [{
                         display: false,
+                        ticks: {
+                            min: null,
+                        }
                     }],
                     yAxes: [{
                         display: false
@@ -49,12 +52,11 @@ export default {
                     }
                 },
                 animation: {
-                    duration: 0,
+                    duration: 1000,
                 }
             },
-            lastCredit: 0,
-            lastDebt: 0,
             // mock only
+            mockMode: false,
             fakeDataInterval: null,
         }
     },
@@ -72,35 +74,27 @@ export default {
             let newCreditPoint;
             let newDebtPoint;
             let tmp = {...this.chartData};
+            let tmpOpt = {...this.options};
+
             tmp.labels = [...this.$store.state.session.financials.timesPolled];
             tmp.datasets[0].data = [...this.$store.state.session.financials.credit];
             tmp.datasets[1].data = [...this.$store.state.session.financials.debt];
 
-            // START: mock
-            /*
-            newCreditPoint = this.$store.getters.credit - this.lastCredit;
-            newDebtPoint = this.$store.getters.debt - this.lastDebt;
-            this.lastCredit = this.$store.getters.credit;
-            this.lastDebt = this.$store.getters.debt;
-
-            tmp.labels.push(tmp.labels.slice(-1)[0] + 1)
-            tmp.datasets[0].data.push(newCreditPoint);
-            tmp.datasets[1].data.push(newDebtPoint);
-            */
-            // END: Mock
-
-            // enforce max data points
-            if(tmp.labels.length > this.maxDataPoints) {
-                let over = tmp.labels.length % this.maxDataPoints;
-                // labels
-                tmp.labels = tmp.labels.slice(over);
-                // credit
-                tmp.datasets[0].data = tmp.datasets[0].data.slice(over);
-                // debt
-                tmp.datasets[1].data = tmp.datasets[1].data.slice(over);
-            }
+            tmpOpt.scales.xAxes[0].ticks.min = tmp.labels[Math.max(0, tmp.labels.length - this.maxDataPoints + 1)]; // update min time to display (show last 30 points)
 
             this.chartData = tmp;
+            this.options = tmpOpt;
+        },
+        mockDataChart: function() {
+            this.fakeDataInterval = setInterval(() => {
+
+                this.$store.commit('appendFinancials', {
+                    time: + new Date(),
+                    credit: Math.random(),
+                    debt: Math.random() * 2
+                });
+
+            }, 2000);
         }
     },
     components: {
@@ -111,51 +105,6 @@ export default {
             deep: true,
             handler() {
                 this.updateChart();
-            }
-        },
-        "$store.state.isNodeRunning": function() {
-            if(1==1) return; // NO LONGER MOCKING
-            this.clearChart();
-
-            if(this.$store.state.isNodeRunning) {
-                // temp chart mocking
-                let intervalCount = 0;
-                this.fakeDataInterval = setInterval(() => {
-                    let tmp = {...this.chartData};
-
-                    tmp.labels.push(intervalCount);
-                    tmp.datasets[0].data.push(Math.random());
-                    tmp.datasets[1].data.push(Math.random() * 2);
-
-                    // enforce max data points
-                    if(tmp.labels.length > this.maxDataPoints) {
-                        let over = tmp.labels.length % this.maxDataPoints;
-                        // labels
-                        tmp.labels = tmp.labels.slice(over);
-                        // credit
-                        tmp.datasets[0].data = tmp.datasets[0].data.slice(over);
-                        // debt
-                        tmp.datasets[1].data = tmp.datasets[1].data.slice(over);
-                    }
-
-
-                    this.chartData = tmp;
-
-                    intervalCount++;
-
-                }, 1000);
-            } else {
-                // node turned off
-                clearInterval(this.fakeDataInterval);
-
-                // place some dummy values for straight lined chart as placeholder
-                let tmp = {...this.chartData};
-
-                tmp.labels = [1, 2];
-                tmp.datasets[0].data = [];
-                tmp.datasets[1].data = [1, 1];
-
-                this.chartData = tmp;
             }
         }
     },
@@ -173,6 +122,13 @@ export default {
 
         this.chartData.datasets[0].backgroundColor = this.gradient2;
         this.chartData.datasets[1].backgroundColor = this.gradient;
+
+        this.updateChart();
+
+        if(this.mockMode) this.mockDataChart();
+    },
+    beforeDestroy() {
+        if(this.mockMode) clearInterval(this.fakeDataInterval);
     }
 }
 </script>

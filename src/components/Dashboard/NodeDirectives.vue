@@ -4,7 +4,7 @@
         <b-button 
             class="float-right" 
             :variant="$store.getters.isNodeConnected ? 'danger' : 'primary'" 
-            :disabled="$store.state.isNodeStarting || $store.state.setupErrors.length > 0"
+            :disabled="$store.state.isNodeStarting || $store.state.setupErrors.length > 0 || !$store.getters.anyConnection"
             @click="nodeOnOffBtnCLicked"
         >
             <!-- Power Icon [hidden on starting/shutting-down] -->
@@ -78,9 +78,9 @@
             <div id="smooth-collapse-margin-alt" style="height: 24px;"></div>
             <b-input-group>
                 <template v-slot:prepend>
-                    <b-input-group-text>Node Descriptor</b-input-group-text>
+                    <b-input-group-text>Local Descriptor</b-input-group-text>
                 </template>
-                <b-form-input :value="$store.state.node.descriptor"></b-form-input>
+                <b-form-input ref="descriptorText" :value="$store.state.node.descriptor"></b-form-input>
 
                 <template v-slot:append>
                     <!-- descriptor: copy button -->
@@ -101,6 +101,11 @@
                     </b-button>
                 </template>
             </b-input-group>
+
+            <!-- share popover -->
+            <b-popover target="btn-share-descriptor" triggers="click blur" placement="left">
+                <ShareDescriptor :descriptor="$store.state.node.descriptor" />
+            </b-popover>
         </b-collapse>
 
         <!-- Setup Errors -->
@@ -145,8 +150,12 @@
 
 <script>
 import clipboard from 'clipboard/src/clipboard';
+import ShareDescriptor from './ShareDescriptor.vue';
 
 export default {
+    components: {
+        ShareDescriptor
+    },
     data() {
         return {
             modeOptions: [],
