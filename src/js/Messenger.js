@@ -24,7 +24,11 @@ export class Messenger {
         if(this._ws) {
             this._ws.close();
         }
-        setTimeout(() => {
+        let awaitDisconnectInterval = setInterval(() => {
+            if(this._isConnected) return; // not ready for new connection, is still connected to last websocket}
+
+            clearInterval(awaitDisconnectInterval);
+
             this._ws = new WebSocket(`ws://localhost:${port}`, 'MASQNode-UIv2');
 
             // add listeners
@@ -34,7 +38,7 @@ export class Messenger {
             this._ws.onclose =      this.onClose.bind(this);
 
             this._port = port;
-        }, 1000);
+        }, 100);
     }
 
     send(opcode, payload = {}) {

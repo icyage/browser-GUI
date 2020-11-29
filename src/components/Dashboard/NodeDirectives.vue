@@ -63,7 +63,8 @@
 
                 <template v-slot:append>
                     <b-button @click="fetchPublicDescriptor" variant="outline-secondary" v-b-tooltip.hover title="Fetch Public Descriptor">
-                        <b-icon icon="cloud-arrow-down"></b-icon>
+                        <b-icon v-show="!queryingNeighbor" icon="cloud-arrow-down"></b-icon>
+                        <b-spinner v-show="queryingNeighbor" small type="grow"></b-spinner>
                     </b-button>
                     <b-button v-show="localNeighborDescriptor && localNeighborDescriptor != descriptor" variant="outline-success" @click="setNeighbor" :disabled="isModeSynced">Set</b-button>
                 </template>
@@ -165,6 +166,7 @@ export default {
             // IP field
             localIPAddress: "",
             queryingIP: false,
+            queryingNeighbor: false,
             lastMode: null,
         }
     },
@@ -182,12 +184,14 @@ export default {
         },
         async fetchPublicDescriptor() {
             let descriptor;
+            this.queryingNeighbor = true;
             if(descriptor = await this.utils.getPublicDescriptor(this.isMainnet)) {
                 this.localNeighborDescriptor = descriptor;
                 this.setNeighbor();
             } else {
                 this.createToast('danger', 'Error fetching public node descriptor.');
             }
+            this.queryingNeighbor = false;
         },
         setNeighbor: function() {
             this.$store.commit('updateSetupProperty', {
