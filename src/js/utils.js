@@ -10,7 +10,7 @@ export class Utils {
      * @param {Array} values payload.values response from masq 'setup'
      * @param {Array} nullifyDefaultsFor setup keys that should be null if default (largely to handle default 'config.toml')
      */
-    static setupValuesToDict(values, nullifyDefaultsFor = []) {
+    static setupValuesToDict(values) {
         let dict = {};
 
         values.forEach((x, i) => {
@@ -155,6 +155,18 @@ export class Utils {
                 break;
             }
         }
+    }
+
+    /**
+     * Determines if the GUI is within an electron window or not.
+     * @returns {Boolean} is environment electron
+     */
+    static isElectronEnvironment() {
+        const userAgent = navigator.userAgent.toLowerCase();
+        if (userAgent.indexOf(' electron/') > -1) {
+            return true;
+        }
+        return false;
     }
 
 }

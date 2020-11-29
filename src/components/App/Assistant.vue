@@ -35,7 +35,7 @@
                             :class="{'ml-4': msg.from == 'user', 'mr-4': msg.from == 'masq', 'float-right': msg.from == 'user', 'float-left': msg.from == 'masq'}"
                             no-body
                         >
-                            {{ msg.text }}
+                            <div v-html="msg.text"></div>
                         </b-card>
                     </div>
 
@@ -59,7 +59,7 @@
                             no-body
                             :ref="i == messageCount - 1 ? 'last_message' : 'msg_i'"
                         >
-                            {{ msg.text }}
+                            <div v-html="msg.text"></div>
                         </b-card>
                     </div>
 
@@ -120,7 +120,7 @@ export default {
         messageCount: function() {
             return this.$store.state.session.assistant.messages.length;
         }
-    }
+    },
 }
 </script>
 

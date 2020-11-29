@@ -40,3 +40,7 @@ This assumes you've installed the packages and have the required software noted 
 * ```npm run start:dev```
 
 Navigate to [http://localhost:8111](http://localhost:8111)
+
+
+## Test
+* ```npm run test```

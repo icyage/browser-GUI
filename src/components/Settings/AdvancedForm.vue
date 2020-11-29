@@ -32,7 +32,15 @@
                         <p>MASQ Node neighbor to initially connect to</p>
                     </b-col>
                     <b-col cols="6">
-                        <b-form-input class="mt-3" v-model="setupCopy['neighbors'].value"></b-form-input>
+                        <b-input-group class="mt-3">
+                            <b-form-input v-model="setupCopy['neighbors'].value"></b-form-input>
+                            <b-input-group-append>
+                                <b-button variant="secondary" @click="fetchPublicDescriptor" v-b-tooltip.hover title="Fetch Public Descriptor">
+                                    <b-icon v-show="!queryingNeighbor" icon="cloud-arrow-down"></b-icon>
+                                    <b-spinner v-show="queryingNeighbor" small type="grow"></b-spinner>
+                                </b-button>
+                            </b-input-group-append>
+                        </b-input-group>
                     </b-col>
                 </b-row>
             </b-list-group-item>
@@ -210,6 +218,7 @@ export default {
             unsynced: [],
             setupCopy: null,
             queryingIP: false,
+            queryingNeighbor: false,
             // options
             chainOptions: [
                 { value: 'mainnet', text: 'Mainnet' },
@@ -241,6 +250,19 @@ export default {
                 this.$state.commit('log', `Failed to get IP (${error})`)
             }
             this.queryingIP = false;
+        },
+        // modified from NodeDirectives.vue
+        async fetchPublicDescriptor() {
+            let descriptor;
+            this.queryingNeighbor = true;
+
+            if(descriptor = await this.utils.getPublicDescriptor(this.setupCopy['chain'].value === 'mainnet')) {
+                this.setupCopy['neighbors'].value = descriptor;
+            } else {
+                this.createToast('danger', 'Error fetching public node descriptor.');
+            }
+
+            this.queryingNeighbor = false;
         },
         saveClicked: function() {
             let tmp = {...this.setupCopy};
