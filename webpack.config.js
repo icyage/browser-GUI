@@ -45,7 +45,7 @@ module.exports = (env, argv) => {
                 ],
             }),
             new webpack.DefinePlugin({
-                GUI_VERSION: JSON.stringify('0.0.5.alpha')
+                GUI_VERSION: JSON.stringify('0.0.6.alpha')
             }),
         ]
     }

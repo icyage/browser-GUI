@@ -1,6 +1,6 @@
 export default class BalanceProviders {
     constructor() {
-        this.MASQ_CONTRACT = '0x02ba9b528425f9de08f961b88a10b03be8b8b998';
+        this.MASQ_CONTRACT = '0x06F3C323f0238c72BF35011071f2b5B7F43A054c';
         this._minTimeInterval = 300000; // ms
 
         this._lastTimeQueried = + new Date();
@@ -14,7 +14,7 @@ export default class BalanceProviders {
         let masqBalance;
         let results;
         // testing override
-        //address = '0xF123808Ce09016bF90072357Ce233FfA82F65c74';
+        //address = '0xb4358fEd970F0016BFf6BddfC744577F547262B3';
         //apiKey = 'freekey';
 
         resp = await fetch(`https://api.ethplorer.io/getAddressInfo/${address}?apiKey=${apiKey}`);
@@ -23,7 +23,7 @@ export default class BalanceProviders {
         ethBalance = data.ETH.balance;
 
         // search for MASQ token
-        results = data.hasOwnProperty('tokens') ? data.tokens.filter(t => t.tokenInfo.address == this.MASQ_CONTRACT) : [];
+        results = data.hasOwnProperty('tokens') ? data.tokens.filter(t => t.tokenInfo.address.toLowerCase() == this.MASQ_CONTRACT.toLowerCase()) : [];
         masqBalance = results.length > 0 ? (results[0].balance).toLocaleString('fullwide', {useGrouping: false}) / 1000000000000000000 : 0;
 
         return {
