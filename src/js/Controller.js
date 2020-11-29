@@ -250,7 +250,7 @@ export class Controller {
         try {
             // skip if values are empty, silently exclude
             if(payload.values.length > 0) {
-                let setupDict = Utils.setupValuesToDict(payload.values, ['config-file']);
+                let setupDict = Utils.setupValuesToDict(payload.values);
                 this._store.commit('updateNodeSetup', setupDict);
 
                 // define wallet set status

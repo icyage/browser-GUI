@@ -10,7 +10,7 @@ export class Utils {
      * @param {Array} values payload.values response from masq 'setup'
      * @param {Array} nullifyDefaultsFor setup keys that should be null if default (largely to handle default 'config.toml')
      */
-    static setupValuesToDict(values, nullifyDefaultsFor = []) {
+    static setupValuesToDict(values) {
         let dict = {};
 
         values.forEach((x, i) => {
